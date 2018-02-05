@@ -22,5 +22,7 @@ CREATE TABLE IF NOT EXISTS menu(
 CREATE TABLE IF NOT EXISTS menu_item(
 	id int PRIMARY KEY AUTO_INCREMENT,
 	name varchar(500),
+	description varchar(1000),
+	restaurant_id int REFERENCES restaurant(id),
 	menu_id int REFERENCES menu(id)
 );
