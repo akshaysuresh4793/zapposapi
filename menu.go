@@ -1,8 +1,9 @@
 package main
 
 import(
-	"fmt"
 	"errors"
+	"strconv"
+	"strings"
 )
 
 type Menu struct {
@@ -15,7 +16,6 @@ func getMenus(restaurantId int, limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
 	result, err := readAllMenus(restaurantId, limit, offset)
-	handleError(err)
 	if err != nil {
 		resp.Message = err.Error()
 		return encode(resp)
@@ -29,7 +29,6 @@ func getMenuById(restaurantId int, id int) string {
 	var resp Response
 	resp.Status = "fail"
 	result, err := readMenu(restaurantId, id)
-	handleError(err)
 	if err != nil {
 		resp.Message = err.Error()
 		return encode(resp)
@@ -46,21 +45,18 @@ func postMenu(restaurantId int, m Menu) string {
 	if(m.Id != 0) {
 		// id cannot be non-zero this is new data
 		err = errors.New("id cannot be nonzero")
-		handleError(err)
 		resp.Message = err.Error()
 		return encode(resp)
 	}
 
 	if(len(m.Name) == 0 || len(m.Name) > 500) {
 		err = errors.New("name length should be between 1 and 500")
-		handleError(err)
 		resp.Message = err.Error()
 		return encode(resp)
 	}
 
 	if(restaurantId == 0) {
 		err = errors.New("restaurantId cannot be zero")
-		handleError(err)
 		resp.Message = err.Error()
 		return encode(resp)
 	}
@@ -69,7 +65,6 @@ func postMenu(restaurantId int, m Menu) string {
 	// TODO: check if the restaurant exists
 
 	err = m.create()
-	handleError(err)
 	if err != nil {
 		resp.Message = err.Error()
 		return encode(resp)
@@ -79,8 +74,17 @@ func postMenu(restaurantId int, m Menu) string {
 	return encode(resp)
 }
 
-func putMenu(restaurantId int, id int, data interface{}) {
-	fmt.Println("update menu id ", id, " for ", restaurantId)
+func putMenu(restaurantId int, id int, r map[string]interface{}) string {
+	var resp Response
+	resp.Status = "fail"
+	err := updateMenu(id, r)
+	if err != nil {
+		resp.Message = err.Error()
+		return encode(resp)
+	}
+	resp.Status = "success"
+	resp.Message = "Updated successfully"
+	return encode(resp)
 }
 
 func deleteMenu(restaurantId int, id int) string {
@@ -90,7 +94,6 @@ func deleteMenu(restaurantId int, id int) string {
 	m.Id = id
 	m.RestaurantId = restaurantId
 	err := m.delete()
-	handleError(err)
 	if err != nil {
 		resp.Message = err.Error()
 		return encode(resp)
@@ -113,12 +116,19 @@ func(m *Menu) create() error {
 
 
 func readMenu(restaurantId int, id int) (Menu, error) {
-	prepare, err := db.Prepare("SELECT id, name FROM menu WHERE id = ? AND restaurant_id = ?")
 	var result Menu
 	var Name string
 	var Id int
+	prepare, err := db.Prepare("SELECT id, name FROM menu WHERE id = ? AND restaurant_id = ?")
+	handleError(err)
+	if err != nil {
+		return result, err
+	}
 	err = prepare.QueryRow(id, restaurantId).Scan(&Id, &Name)
 	handleError(err)
+	if err != nil {
+		return result, err
+	}
 	result.Id = Id
 	result.Name = Name
 	result.RestaurantId = restaurantId
@@ -127,14 +137,21 @@ func readMenu(restaurantId int, id int) (Menu, error) {
 
 
 func readAllMenus(restaurantId int, limit int, offset int) ([]Menu, error) {
-	prepare, err := db.Query("SELECT id, name FROM menu WHERE restaurant_id = ? LIMIT ?,?", restaurantId, limit, offset)
 	var result []Menu
 	var m Menu
 	var Name string
 	var Id int
+	prepare, err := db.Query("SELECT id, name FROM menu WHERE restaurant_id = ? LIMIT ?,?", restaurantId, limit, offset)
+	handleError(err)
+	if err != nil {
+		return result, err
+	}
 	for prepare.Next() {
 		err = prepare.Scan(&Id, &Name)
 		handleError(err)
+		if err != nil {
+			return result, err
+		}
 		m.Id = Id
 		m.Name = Name
 		m.RestaurantId = restaurantId
@@ -144,8 +161,46 @@ func readAllMenus(restaurantId int, limit int, offset int) ([]Menu, error) {
 }
 
 // update a menu
-func (m *Menu) update(){
-	fmt.Println("Update");
+func updateMenu(id int, r map[string] interface{}) error {
+	var err error
+	var restaurantId int
+	output := "UPDATE menu SET "
+	var values []interface{}
+	for k,v := range(r) {
+		if k == "name" {
+			if len(v.(string)) == 0 || len(v.(string)) > 500 {
+				err = errors.New("Name has to be between 1 and 500 characters")
+				return err
+			} else {
+				output += "name = ?, "
+				values = append(values, v.(string))
+			}
+		}
+		if k == "restaurantId" { 
+			if v.(string) == "0" {
+				err = errors.New("restaurantId cannot be 0")
+				return err
+			} else {
+				output += "restaurant_id = ?, "
+				restaurantId, err = strconv.Atoi(v.(string))
+				handleError(err)
+				if err != nil {
+					return err
+				}
+				values = append(values, restaurantId)
+			}
+		}
+	}
+	output = strings.Trim(output,", ")
+	output += " WHERE id = ?"
+	values = append(values, id)
+	prepare, errr := db.Exec(output, values...)
+	handleError(errr)
+	_ = prepare
+	if errr != nil {
+		return errr
+	}
+	return err
 }
 
 // delete a menu

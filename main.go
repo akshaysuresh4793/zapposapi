@@ -207,11 +207,47 @@ func main() {
 
 	mux.HandleFunc("/restaurant/{restaurant-id}",  func(w http.ResponseWriter, r *http.Request) {
 			vars := mu.Vars(r)
-			data := handleData(r,"restaurant")
+			data := handleData(r,"raw")
 			_ = data
 			restaurantId, err := strconv.Atoi(vars["restaurant-id"])
 			handleError(err)
-			result := getRestaurantById(restaurantId)
+			result := putRestaurant(restaurantId, data.(map[string]interface{}))
+			fmt.Fprintf(w, result)
+	}).Methods("PUT")
+
+	mux.HandleFunc("/restaurant/{restaurant-id}/menu/{menu-id}",  func(w http.ResponseWriter, r *http.Request) {
+			vars := mu.Vars(r)
+			data := handleData(r,"raw")
+			_ = data
+			restaurantId, err := strconv.Atoi(vars["restaurant-id"])
+			handleError(err)
+			menuId, err := strconv.Atoi(vars["menu-id"])
+			handleError(err)
+			result := putMenu(restaurantId, menuId, data.(map[string]interface{}))
+			fmt.Fprintf(w, result)
+	}).Methods("PUT")
+
+	mux.HandleFunc("/restaurant/{restaurant-id}/menu/{menu-id}/menu-item/{menu-item-id}",  func(w http.ResponseWriter, r *http.Request) {
+			vars := mu.Vars(r)
+			data := handleData(r,"raw")
+			_ = data
+			restaurantId, err := strconv.Atoi(vars["restaurant-id"])
+			handleError(err)
+			menuId, err := strconv.Atoi(vars["menu-id"])
+			handleError(err)
+			menuItemId, err := strconv.Atoi(vars["menu--item-id"])
+			handleError(err)
+			result := putMenuItem(restaurantId, menuId, menuItemId, data.(map[string]interface{}))
+			fmt.Fprintf(w, result)
+	}).Methods("PUT")
+
+	mux.HandleFunc("/location/{location-id}", func(w http.ResponseWriter, r *http.Request) {
+			vars := mu.Vars(r)
+			data := handleData(r,"raw")
+			_ = data
+			locationId, err := strconv.Atoi(vars["location-id"])
+			handleError(err)
+			result := putLocation(locationId, data.(map[string]interface{}))
 			fmt.Fprintf(w, result)
 	}).Methods("PUT")
 

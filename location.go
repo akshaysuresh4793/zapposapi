@@ -1,8 +1,8 @@
 package main
 
 import(
-	"fmt"
 	"errors"
+	"strings"
 )
 
 type Location struct {
@@ -14,7 +14,6 @@ func getLocations(limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
 	result, err := readAllLocations(limit, offset)
-	handleError(err)
 	if err != nil {
 		resp.Message = err.Error()
 		return  encode(resp)
@@ -29,7 +28,6 @@ func getLocationById(id int) string {
 	var resp Response
 	resp.Status = "fail"
 	result, err := readLocation(id)
-	handleError(err)
 	if (err != nil) {
 		resp.Message = err.Error()
 		return  encode(resp)
@@ -46,14 +44,12 @@ func postLocation(l Location) string {
 	// data validation
 	if(l.Id != 0) {
 		err := errors.New("Id is nonzero")
-		handleError(err)
 		// id cannot be non-zero this is a new insert
 		resp.Message = err.Error()
 		return  encode(resp)
 	}
 	if len(l.Name) == 0 && len(l.Name) > 500 {
 		err := errors.New("Name should be between 1 and 500 characters")
-		handleError(err)
 		// MySQL has varchar(500) - this would break
 		resp.Message = err.Error()
 		return  encode(resp)
@@ -69,8 +65,17 @@ func postLocation(l Location) string {
 	return encode(resp)
 }
 
-func putLocation(id int, data interface{}) {
-	fmt.Println("update locations")
+func putLocation(id int, r map[string]interface{}) string {
+	var resp Response
+	resp.Status = "fail"
+	err := updateLocation(id, r)
+	if err != nil {
+		resp.Message = err.Error()
+		return encode(resp)
+	}
+	resp.Status = "success"
+	resp.Message = "Updated successfully"
+	return encode(resp)
 }
 
 func deleteLocation(id int) string {
@@ -79,7 +84,6 @@ func deleteLocation(id int) string {
 	var l Location
 	l.Id = id
 	err := l.delete()
-	handleError(err)
 	if err != nil {
 		resp.Message = err.Error()
 		return  encode(resp)
@@ -100,10 +104,14 @@ func(l *Location) create() error {
 
 // read a location
 func readLocation(id int) (Location, error) {
-	prepare, err := db.Prepare("SELECT id, name FROM location WHERE id = ?")
 	var result Location
 	var Name string
 	var Id int
+	prepare, err := db.Prepare("SELECT id, name FROM location WHERE id = ?")
+	handleError(err)
+	if err != nil {
+		return result, err
+	}
 	err = prepare.QueryRow(id).Scan(&Id, &Name)
 	handleError(err)
 	result.Id = Id
@@ -113,14 +121,21 @@ func readLocation(id int) (Location, error) {
 
 
 func readAllLocations(limit int, offset int) ([]Location, error) {
-	prepare, err := db.Query("SELECT id, name FROM location LIMIT ?,?", limit, offset)
 	var result []Location
 	var l Location
 	var Name string
 	var Id int
+	prepare, err := db.Query("SELECT id, name FROM location LIMIT ?,?", limit, offset)
+	handleError(err)
+	if err != nil {
+		return result, err
+	}
 	for prepare.Next() {
 		err = prepare.Scan(&Id, &Name)
 		handleError(err)
+		if err != nil {
+			return result, err
+		}
 		l.Id = Id
 		l.Name = Name
 		result = append(result, l)
@@ -129,8 +144,31 @@ func readAllLocations(limit int, offset int) ([]Location, error) {
 }
 
 // update a location
-func (l *Location) update(){
-	fmt.Println("Update");
+func updateLocation(id int, r map[string] interface{}) error {
+	var err error
+	output := "UPDATE location SET "
+	var values []interface{}
+	for k,v := range(r) {
+		if k == "name" {
+			if len(v.(string)) == 0 || len(v.(string)) > 500 {
+				err = errors.New("Name has to be between 1 and 500 characters")
+				return err
+			} else {
+				output += "name = ?, "
+				values = append(values, v.(string))
+			}
+		}
+	}
+	output = strings.Trim(output,", ")
+	output += " WHERE id = ?"
+	values = append(values, id)
+	prepare, errr := db.Exec(output, values...)
+	handleError(errr)
+	_ = prepare
+	if errr != nil {
+		return errr
+	}
+	return err
 }
 
 // delete a location
