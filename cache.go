@@ -1,13 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-redis/redis"
 	"os"
-	"fmt"
 	"time"
 )
 
 var cache *redis.Client
+
 func cacheInitialize() {
 	cacheHost := "192.168.99.100"
 	cachePort := "6379"
@@ -24,7 +25,6 @@ func cacheInitialize() {
 		DB:       0,  // use default DB
 	})
 }
-
 
 func set(key string, value string) {
 	err := cache.Set(key, value, time.Hour).Err()
@@ -46,5 +46,5 @@ func get(key string) string {
 }
 
 func delete(key string) {
-	err := cache.Delete(key)
+	_ = cache.Del(key)
 }

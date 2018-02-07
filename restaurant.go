@@ -1,35 +1,29 @@
 package main
 
-import(
-	_"fmt"
+import (
 	"errors"
+	_ "fmt"
 	"strconv"
 	"strings"
 )
 
 type Restaurant struct {
-	Id int `json: "id"`
-	Name string `json:"name"`
-	LocationId int `json:"locationId,string"`
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	LocationId int    `json:"locationId,string"`
 }
 
 func getRestaurants(limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
-	cacheKey := "restaurant_limit_" + strconv.Itoa(limit) + "_offset_" + strconv.Itoa(offset)
-	cacheValue := get(cacheKey)
-	if len(cacheValue) > 0 {
-		return cacheValue
-	}
 	result, err := readAllRestaurants(limit, offset)
-	if(err != nil) {
+	if err != nil {
 		resp.Message = err.Error()
 		return encode(resp)
 	}
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
-	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 
@@ -42,7 +36,7 @@ func getRestaurantById(id int) string {
 		return cacheValue
 	}
 	result, err := readRestaurant(id)
-	if(err != nil) {
+	if err != nil {
 		resp.Message = err.Error()
 		return encode(resp)
 	}
@@ -57,7 +51,7 @@ func postRestaurant(r Restaurant) string {
 	var resp Response
 	resp.Status = "fail"
 	var err error
-	if(r.Id != 0) {
+	if r.Id != 0 {
 		// id cannot be non-zero this is a new insert
 		err = errors.New("Id is nonzero")
 		resp.Message = err.Error()
@@ -120,7 +114,7 @@ func deleteRestaurant(id int) string {
 }
 
 // create a restaurant
-func(r *Restaurant) create() (error) {
+func (r *Restaurant) create() error {
 	// prepare MySQL query
 	// insert
 	result, err := db.Exec("INSERT INTO restaurant(name, location_id) VALUES (?, ?)", r.Name, r.LocationId)
@@ -151,7 +145,6 @@ func readRestaurant(id int) (Restaurant, error) {
 	return result, err
 }
 
-
 func readAllRestaurants(limit int, offset int) ([]Restaurant, error) {
 	var result []Restaurant
 	var r Restaurant
@@ -177,12 +170,12 @@ func readAllRestaurants(limit int, offset int) ([]Restaurant, error) {
 	return result, err
 }
 
-func updateRestaurant(id int, r map[string] interface{}) error {
+func updateRestaurant(id int, r map[string]interface{}) error {
 	var err error
 	var locationId int
 	output := "UPDATE restaurant SET "
 	var values []interface{}
-	for k,v := range(r) {
+	for k, v := range r {
 		if k == "name" {
 			if len(v.(string)) == 0 || len(v.(string)) > 500 {
 				err = errors.New("Name has to be between 1 and 500 characters")
@@ -192,7 +185,7 @@ func updateRestaurant(id int, r map[string] interface{}) error {
 				values = append(values, v.(string))
 			}
 		}
-		if k == "locationId" { 
+		if k == "locationId" {
 			if v.(string) == "0" {
 				err = errors.New("locationId cannot be 0")
 				return err
@@ -207,7 +200,7 @@ func updateRestaurant(id int, r map[string] interface{}) error {
 			}
 		}
 	}
-	output = strings.Trim(output,", ")
+	output = strings.Trim(output, ", ")
 	output += " WHERE id = ?"
 	values = append(values, id)
 	prepare, errr := db.Exec(output, values...)

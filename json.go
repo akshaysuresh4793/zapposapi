@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	_"reflect"
+	_ "reflect"
 )
 
 func encode(input interface{}) string {

@@ -1,25 +1,20 @@
 package main
 
-import(
+import (
 	"errors"
 	"strconv"
 	"strings"
 )
 
 type Menu struct {
-	Id int `json:"id,string"`
-	Name string `json:"name"`
-	RestaurantId int `json:"restaurantId,string"`
+	Id           int    `json:"id,string"`
+	Name         string `json:"name"`
+	RestaurantId int    `json:"restaurantId,string"`
 }
 
 func getMenus(restaurantId int, limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
-	cacheKey := "menu_restaurantid_" + strconv.Itoa(restaurantId) + "_limit_" + strconv.Itoa(limit) + "_offset_" + strconv.Itoa(offset)
-	cacheValue := get(cacheKey)
-	if len(cacheValue) > 0 {
-		return cacheValue
-	}
 	result, err := readAllMenus(restaurantId, limit, offset)
 	if err != nil {
 		resp.Message = err.Error()
@@ -28,7 +23,6 @@ func getMenus(restaurantId int, limit int, offset int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
-	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 func getMenuById(restaurantId int, id int) string {
@@ -54,20 +48,20 @@ func postMenu(restaurantId int, m Menu) string {
 	var resp Response
 	var err error
 	resp.Status = "fail"
-	if(m.Id != 0) {
+	if m.Id != 0 {
 		// id cannot be non-zero this is new data
 		err = errors.New("id cannot be nonzero")
 		resp.Message = err.Error()
 		return encode(resp)
 	}
 
-	if(len(m.Name) == 0 || len(m.Name) > 500) {
+	if len(m.Name) == 0 || len(m.Name) > 500 {
 		err = errors.New("name length should be between 1 and 500")
 		resp.Message = err.Error()
 		return encode(resp)
 	}
 
-	if(restaurantId == 0) {
+	if restaurantId == 0 {
 		err = errors.New("restaurantId cannot be zero")
 		resp.Message = err.Error()
 		return encode(resp)
@@ -97,7 +91,7 @@ func putMenu(restaurantId int, id int, r map[string]interface{}) string {
 	resp.Status = "success"
 	resp.Message = "Updated successfully"
 	cacheKey := "menu_restaurantid_" + strconv.Itoa(restaurantId) + "_id_" + strconv.Itoa(id)
-	delete(cacheKey, encode(resp))
+	delete(cacheKey)
 	return encode(resp)
 }
 
@@ -115,12 +109,12 @@ func deleteMenu(restaurantId int, id int) string {
 	resp.Status = "success"
 	resp.Message = "Deleted successfully"
 	cacheKey := "menu_restaurantid_" + strconv.Itoa(restaurantId) + "_id_" + strconv.Itoa(id)
-	delete(cacheKey, encode(resp))
+	delete(cacheKey)
 	return encode(resp)
 }
 
 // create a menu
-func(m *Menu) create() error {
+func (m *Menu) create() error {
 	// prepare MySQL query
 	// insert
 	result, err := db.Exec("INSERT INTO menu(name, restaurant_id) VALUES (?, ?)", m.Name, m.RestaurantId)
@@ -128,7 +122,6 @@ func(m *Menu) create() error {
 	_ = result
 	return err
 }
-
 
 func readMenu(restaurantId int, id int) (Menu, error) {
 	var result Menu
@@ -149,7 +142,6 @@ func readMenu(restaurantId int, id int) (Menu, error) {
 	result.RestaurantId = restaurantId
 	return result, err
 }
-
 
 func readAllMenus(restaurantId int, limit int, offset int) ([]Menu, error) {
 	var result []Menu
@@ -176,12 +168,12 @@ func readAllMenus(restaurantId int, limit int, offset int) ([]Menu, error) {
 }
 
 // update a menu
-func updateMenu(id int, r map[string] interface{}) error {
+func updateMenu(id int, r map[string]interface{}) error {
 	var err error
 	var restaurantId int
 	output := "UPDATE menu SET "
 	var values []interface{}
-	for k,v := range(r) {
+	for k, v := range r {
 		if k == "name" {
 			if len(v.(string)) == 0 || len(v.(string)) > 500 {
 				err = errors.New("Name has to be between 1 and 500 characters")
@@ -191,7 +183,7 @@ func updateMenu(id int, r map[string] interface{}) error {
 				values = append(values, v.(string))
 			}
 		}
-		if k == "restaurantId" { 
+		if k == "restaurantId" {
 			if v.(string) == "0" {
 				err = errors.New("restaurantId cannot be 0")
 				return err
@@ -206,7 +198,7 @@ func updateMenu(id int, r map[string] interface{}) error {
 			}
 		}
 	}
-	output = strings.Trim(output,", ")
+	output = strings.Trim(output, ", ")
 	output += " WHERE id = ?"
 	values = append(values, id)
 	prepare, errr := db.Exec(output, values...)

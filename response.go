@@ -1,7 +1,7 @@
 package main
 
 type Response struct {
-	Status string
+	Status  string
 	Message string
-	Data interface{}
+	Data    interface{}
 }

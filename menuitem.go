@@ -1,27 +1,22 @@
 package main
 
-import(
+import (
 	"errors"
 	"strconv"
 	"strings"
 )
 
 type MenuItem struct {
-	Id int `json:"id,string"`
-	Name string `json:"name"`
-	MenuId int `json:"menuId,string"`
-	RestaurantId int `json:"restaurantId,string"`
-	Description string `json:"description"`
+	Id           int    `json:"id,string"`
+	Name         string `json:"name"`
+	MenuId       int    `json:"menuId,string"`
+	RestaurantId int    `json:"restaurantId,string"`
+	Description  string `json:"description"`
 }
 
 func getMenuItems(restaurantId int, menuId int, limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
-	cacheKey := "menuitem_restaurantid_" + strconv.Itoa(restaurantId) + "_menuid_" + strconv.Itoa(menuId) + "_limit_" + strconv.Itoa(limit) + "_offset_" + strconv.Itoa(offset)
-	cacheValue := get(cacheKey)
-	if len(cacheValue) > 0 {
-		return cacheValue
-	}
 	result, err := readAllMenuItems(restaurantId, menuId, limit, offset)
 	if err != nil {
 		resp.Message = err.Error()
@@ -30,7 +25,6 @@ func getMenuItems(restaurantId int, menuId int, limit int, offset int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
-	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 
@@ -59,21 +53,21 @@ func postMenuItem(restaurantId int, menuId int, m MenuItem) string {
 	var err error
 	resp.Status = "fail"
 	if restaurantId == 0 {
-		err =  errors.New("restaurantId cannot be zero")
+		err = errors.New("restaurantId cannot be zero")
 		resp.Message = err.Error()
 		return encode(resp)
 	}
 	if menuId == 0 {
-		err =  errors.New("menuId cannot be zero")
+		err = errors.New("menuId cannot be zero")
 		resp.Message = err.Error()
 		return encode(resp)
 	}
-	if(len(m.Name) == 0 || len(m.Name) > 500) {
+	if len(m.Name) == 0 || len(m.Name) > 500 {
 		err = errors.New("name length should be between 1 and 500")
 		resp.Message = err.Error()
 		return encode(resp)
 	}
-	if(len(m.Description) == 0 || len(m.Description) > 1000) {
+	if len(m.Description) == 0 || len(m.Description) > 1000 {
 		err = errors.New("description length should be between 1 and 1000")
 		resp.Message = err.Error()
 		return encode(resp)
@@ -125,7 +119,7 @@ func deleteMenuItem(restaurantId int, menuId int, id int) string {
 }
 
 // create a menu-item
-func(m *MenuItem) create() error {
+func (m *MenuItem) create() error {
 	result, err := db.Exec("INSERT INTO menu_item(name, description, restaurant_id, menu_id) VALUES (?, ?, ?, ?)", m.Name, m.Description, m.RestaurantId, m.MenuId)
 	handleError(err)
 	if err != nil {
@@ -186,13 +180,13 @@ func readAllMenuItems(restaurantId int, menuId int, limit int, offset int) ([]Me
 }
 
 // update a menu-item
-func updateMenuItem(id int, r map[string] interface{}) error {
+func updateMenuItem(id int, r map[string]interface{}) error {
 	var err error
 	var restaurantId int
 	var menuId int
 	output := "UPDATE menu_item SET "
 	var values []interface{}
-	for k,v := range(r) {
+	for k, v := range r {
 		if k == "name" {
 			if len(v.(string)) == 0 || len(v.(string)) > 500 {
 				err = errors.New("Name has to be between 1 and 500 characters")
@@ -202,7 +196,7 @@ func updateMenuItem(id int, r map[string] interface{}) error {
 				values = append(values, v.(string))
 			}
 		}
-		if k == "restaurantId" { 
+		if k == "restaurantId" {
 			if v.(string) == "0" {
 				err = errors.New("restaurantId cannot be 0")
 				return err
@@ -216,7 +210,7 @@ func updateMenuItem(id int, r map[string] interface{}) error {
 				values = append(values, restaurantId)
 			}
 		}
-		if k == "description" { 
+		if k == "description" {
 			if v.(string) == "0" {
 				err = errors.New("Description has to be between 1 and 500 characters")
 				return err
@@ -225,7 +219,7 @@ func updateMenuItem(id int, r map[string] interface{}) error {
 				values = append(values, v.(string))
 			}
 		}
-		if k == "menuId" { 
+		if k == "menuId" {
 			if v.(string) == "0" {
 				err = errors.New("menuId cannot be 0")
 				return err
@@ -240,7 +234,7 @@ func updateMenuItem(id int, r map[string] interface{}) error {
 			}
 		}
 	}
-	output = strings.Trim(output,", ")
+	output = strings.Trim(output, ", ")
 	output += " WHERE id = ?"
 	values = append(values, id)
 	prepare, errr := db.Exec(output, values...)
@@ -253,7 +247,7 @@ func updateMenuItem(id int, r map[string] interface{}) error {
 }
 
 // delete a menu-item
-func(m *MenuItem) delete() error {
+func (m *MenuItem) delete() error {
 	prepare, err := db.Exec("DELETE FROM menu_item WHERE id = ? AND restaurant_id = ? AND menu_id = ?", m.Id, m.RestaurantId, m.MenuId)
 	handleError(err)
 	if err != nil {

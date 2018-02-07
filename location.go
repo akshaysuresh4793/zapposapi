@@ -1,34 +1,27 @@
 package main
 
-import(
+import (
 	"errors"
-	"strings"
 	"strconv"
-	"fmt"
+	"strings"
 )
 
 type Location struct {
-	Id int `json: "id,string"`
+	Id   int    `json:"id,string"`
 	Name string `json:"name"`
 }
 
 func getLocations(limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
-	cacheKey := "location_" + strconv.Itoa(limit) + "_offset_" + strconv.Itoa(offset)
-	cacheValue := get(cacheKey)
-	if len(cacheValue) > 0 {
-		return cacheValue
-	}
 	result, err := readAllLocations(limit, offset)
 	if err != nil {
 		resp.Message = err.Error()
-		return  encode(resp)
+		return encode(resp)
 	}
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
-	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 
@@ -41,9 +34,9 @@ func getLocationById(id int) string {
 		return cacheValue
 	}
 	result, err := readLocation(id)
-	if (err != nil) {
+	if err != nil {
 		resp.Message = err.Error()
-		return  encode(resp)
+		return encode(resp)
 	}
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
@@ -56,23 +49,23 @@ func postLocation(l Location) string {
 	var resp Response
 	resp.Status = "fail"
 	// data validation
-	if(l.Id != 0) {
+	if l.Id != 0 {
 		err := errors.New("Id is nonzero")
 		// id cannot be non-zero this is a new insert
 		resp.Message = err.Error()
-		return  encode(resp)
+		return encode(resp)
 	}
 	if len(l.Name) == 0 && len(l.Name) > 500 {
 		err := errors.New("Name should be between 1 and 500 characters")
 		// MySQL has varchar(500) - this would break
 		resp.Message = err.Error()
-		return  encode(resp)
+		return encode(resp)
 	}
 	// TODO: check if the name already exists
 	err := l.create()
 	if err != nil {
 		resp.Message = err.Error()
-		return  encode(resp)
+		return encode(resp)
 	}
 	resp.Status = "success"
 	resp.Message = "Inserted successfully"
@@ -102,7 +95,7 @@ func deleteLocation(id int) string {
 	err := l.delete()
 	if err != nil {
 		resp.Message = err.Error()
-		return  encode(resp)
+		return encode(resp)
 	}
 	resp.Status = "success"
 	resp.Message = "Deleted successfully"
@@ -112,7 +105,7 @@ func deleteLocation(id int) string {
 }
 
 // create a location
-func(l *Location) create() error {
+func (l *Location) create() error {
 	result, err := db.Exec("INSERT INTO location(name) VALUES (?)", l.Name)
 	handleError(err)
 	_ = result
@@ -135,7 +128,6 @@ func readLocation(id int) (Location, error) {
 	result.Name = Name
 	return result, err
 }
-
 
 func readAllLocations(limit int, offset int) ([]Location, error) {
 	var result []Location
@@ -161,11 +153,11 @@ func readAllLocations(limit int, offset int) ([]Location, error) {
 }
 
 // update a location
-func updateLocation(id int, r map[string] interface{}) error {
+func updateLocation(id int, r map[string]interface{}) error {
 	var err error
 	output := "UPDATE location SET "
 	var values []interface{}
-	for k,v := range(r) {
+	for k, v := range r {
 		if k == "name" {
 			if len(v.(string)) == 0 || len(v.(string)) > 500 {
 				err = errors.New("Name has to be between 1 and 500 characters")
@@ -176,7 +168,7 @@ func updateLocation(id int, r map[string] interface{}) error {
 			}
 		}
 	}
-	output = strings.Trim(output,", ")
+	output = strings.Trim(output, ", ")
 	output += " WHERE id = ?"
 	values = append(values, id)
 	prepare, errr := db.Exec(output, values...)
