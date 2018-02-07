@@ -31,7 +31,7 @@ func set(key string, value string) {
 }
 
 func get(key string) string {
-	value, err := client.Get(key).Result()
+	value, err := cache.Get(key).Result()
 	if err == redis.Nil {
 		// do nothing
 		return ""
