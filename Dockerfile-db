@@ -1,0 +1,7 @@
+# MySQL
+FROM mysql
+ENV MYSQL_ROOT_PASSWORD password
+ADD schema.sql /tmp/schema.sql
+ADD setup/db/schema.sh /tmp/schema.sh
+ADD setup/db/schema.sh /docker-entrypoint-initdb.d/schema.sh
+RUN ./tmp/schema.sh
