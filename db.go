@@ -23,8 +23,9 @@ func init() {
 		if len(os.Getenv("DBPASSWORD")) > 0 {
 			dbPassword = os.Getenv("DBPASSWORD")
 		}
-		fmt.Println("Connecting to ", dbHost,":", dbPort)
+		fmt.Println("Connecting to MySQL - ", dbHost,":", dbPort)
 		var err error
 		db, err = sql.Open("mysql", dbUser + ":" + dbPassword + "@tcp(" + dbHost + ":" + dbPort + ")/zappos")
 		handleError(err)
+		initialize()
 }
