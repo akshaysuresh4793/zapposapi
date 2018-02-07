@@ -4,11 +4,12 @@ import (
 	"github.com/go-redis/redis"
 	"os"
 	"fmt"
+	"time"
 )
 
 var cache *redis.Client
-func initialize() {
-	cacheHost := "localhost"
+func cacheInitialize() {
+	cacheHost := "192.168.99.100"
 	cachePort := "6379"
 	if len(os.Getenv("CACHEHOST")) > 0 {
 		cacheHost = os.Getenv("CACHEHOST")
@@ -26,7 +27,7 @@ func initialize() {
 
 
 func set(key string, value string) {
-	err := cache.Set(key, value, 0).Err()
+	err := cache.Set(key, value, time.Hour).Err()
 	handleError(err)
 }
 
@@ -40,5 +41,10 @@ func get(key string) string {
 	if err != nil {
 		return ""
 	}
+	fmt.Println("cache hit")
 	return value
+}
+
+func delete(key string) {
+	err := cache.Delete(key)
 }

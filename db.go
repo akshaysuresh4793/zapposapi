@@ -6,7 +6,7 @@ import (
 	"fmt")
 
 var db *sql.DB
-func init() {
+func connect() error {
 		dbHost := "localhost"
 		dbPort := "3306"
 		dbUser := "root"
@@ -27,5 +27,6 @@ func init() {
 		var err error
 		db, err = sql.Open("mysql", dbUser + ":" + dbPassword + "@tcp(" + dbHost + ":" + dbPort + ")/zappos")
 		handleError(err)
-		initialize()
+		cacheInitialize()
+		return err
 }

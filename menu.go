@@ -15,6 +15,11 @@ type Menu struct {
 func getMenus(restaurantId int, limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
+	cacheKey := "menu_restaurantid_" + strconv.Itoa(restaurantId) + "_limit_" + strconv.Itoa(limit) + "_offset_" + strconv.Itoa(offset)
+	cacheValue := get(cacheKey)
+	if len(cacheValue) > 0 {
+		return cacheValue
+	}
 	result, err := readAllMenus(restaurantId, limit, offset)
 	if err != nil {
 		resp.Message = err.Error()
@@ -23,11 +28,17 @@ func getMenus(restaurantId int, limit int, offset int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
+	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 func getMenuById(restaurantId int, id int) string {
 	var resp Response
 	resp.Status = "fail"
+	cacheKey := "menu_restaurantid_" + strconv.Itoa(restaurantId) + "_id_" + strconv.Itoa(id)
+	cacheValue := get(cacheKey)
+	if len(cacheValue) > 0 {
+		return cacheValue
+	}
 	result, err := readMenu(restaurantId, id)
 	if err != nil {
 		resp.Message = err.Error()
@@ -36,6 +47,7 @@ func getMenuById(restaurantId int, id int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
+	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 func postMenu(restaurantId int, m Menu) string {
@@ -84,6 +96,8 @@ func putMenu(restaurantId int, id int, r map[string]interface{}) string {
 	}
 	resp.Status = "success"
 	resp.Message = "Updated successfully"
+	cacheKey := "menu_restaurantid_" + strconv.Itoa(restaurantId) + "_id_" + strconv.Itoa(id)
+	delete(cacheKey, encode(resp))
 	return encode(resp)
 }
 
@@ -100,6 +114,8 @@ func deleteMenu(restaurantId int, id int) string {
 	}
 	resp.Status = "success"
 	resp.Message = "Deleted successfully"
+	cacheKey := "menu_restaurantid_" + strconv.Itoa(restaurantId) + "_id_" + strconv.Itoa(id)
+	delete(cacheKey, encode(resp))
 	return encode(resp)
 }
 
@@ -110,7 +126,6 @@ func(m *Menu) create() error {
 	result, err := db.Exec("INSERT INTO menu(name, restaurant_id) VALUES (?, ?)", m.Name, m.RestaurantId)
 	handleError(err)
 	_ = result
-	// update cache
 	return err
 }
 

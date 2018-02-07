@@ -41,6 +41,10 @@ import (
 */
 
 func main() {
+	// connect to db
+	_ = connect()
+
+
 	// entry point
 	mux := mu.NewRouter()
 
@@ -313,6 +317,13 @@ func main() {
 			var resp Response
 			resp.Status = "fail"
 			resp.Message = "404 Page not found"
+			fmt.Fprintf(w, encode(resp))
+	})
+
+	mux.MethodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+			var resp Response
+			resp.Status = "fail"
+			resp.Message = "405 Method not allowed"
 			fmt.Fprintf(w, encode(resp))
 	})
 

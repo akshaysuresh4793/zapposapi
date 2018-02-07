@@ -3,6 +3,8 @@ package main
 import(
 	"errors"
 	"strings"
+	"strconv"
+	"fmt"
 )
 
 type Location struct {
@@ -13,6 +15,11 @@ type Location struct {
 func getLocations(limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
+	cacheKey := "location_" + strconv.Itoa(limit) + "_offset_" + strconv.Itoa(offset)
+	cacheValue := get(cacheKey)
+	if len(cacheValue) > 0 {
+		return cacheValue
+	}
 	result, err := readAllLocations(limit, offset)
 	if err != nil {
 		resp.Message = err.Error()
@@ -21,12 +28,18 @@ func getLocations(limit int, offset int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
+	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 
 func getLocationById(id int) string {
 	var resp Response
 	resp.Status = "fail"
+	cacheKey := "location_id_" + strconv.Itoa(id)
+	cacheValue := get(cacheKey)
+	if len(cacheValue) > 0 {
+		return cacheValue
+	}
 	result, err := readLocation(id)
 	if (err != nil) {
 		resp.Message = err.Error()
@@ -35,6 +48,7 @@ func getLocationById(id int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
+	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 
@@ -61,7 +75,7 @@ func postLocation(l Location) string {
 		return  encode(resp)
 	}
 	resp.Status = "success"
-	resp.Message = "Updated successfully"
+	resp.Message = "Inserted successfully"
 	return encode(resp)
 }
 
@@ -75,6 +89,8 @@ func putLocation(id int, r map[string]interface{}) string {
 	}
 	resp.Status = "success"
 	resp.Message = "Updated successfully"
+	cacheKey := "location_id_" + strconv.Itoa(id)
+	delete(cacheKey)
 	return encode(resp)
 }
 
@@ -90,6 +106,8 @@ func deleteLocation(id int) string {
 	}
 	resp.Status = "success"
 	resp.Message = "Deleted successfully"
+	cacheKey := "location_id_" + strconv.Itoa(id)
+	delete(cacheKey)
 	return encode(resp)
 }
 
@@ -98,7 +116,6 @@ func(l *Location) create() error {
 	result, err := db.Exec("INSERT INTO location(name) VALUES (?)", l.Name)
 	handleError(err)
 	_ = result
-	// update cache
 	return err
 }
 

@@ -17,6 +17,11 @@ type MenuItem struct {
 func getMenuItems(restaurantId int, menuId int, limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
+	cacheKey := "menuitem_restaurantid_" + strconv.Itoa(restaurantId) + "_menuid_" + strconv.Itoa(menuId) + "_limit_" + strconv.Itoa(limit) + "_offset_" + strconv.Itoa(offset)
+	cacheValue := get(cacheKey)
+	if len(cacheValue) > 0 {
+		return cacheValue
+	}
 	result, err := readAllMenuItems(restaurantId, menuId, limit, offset)
 	if err != nil {
 		resp.Message = err.Error()
@@ -25,12 +30,18 @@ func getMenuItems(restaurantId int, menuId int, limit int, offset int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
+	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 
 func getMenuItemById(restaurantId int, menuId int, id int) string {
 	var resp Response
 	resp.Status = "fail"
+	cacheKey := "menuitem_restaurantid_" + strconv.Itoa(restaurantId) + "_menuid_" + strconv.Itoa(menuId) + "_id_" + strconv.Itoa(id)
+	cacheValue := get(cacheKey)
+	if len(cacheValue) > 0 {
+		return cacheValue
+	}
 	result, err := readMenuItem(restaurantId, menuId, id)
 	if err != nil {
 		resp.Message = err.Error()
@@ -39,6 +50,7 @@ func getMenuItemById(restaurantId int, menuId int, id int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
+	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 
@@ -66,10 +78,7 @@ func postMenuItem(restaurantId int, menuId int, m MenuItem) string {
 		resp.Message = err.Error()
 		return encode(resp)
 	}
-	// TODO: check if the restaurant exists
 	m.RestaurantId = restaurantId
-
-	// TODO: check if the menu exists
 	m.MenuId = menuId
 	err = m.create()
 	if err != nil {
@@ -91,6 +100,8 @@ func putMenuItem(restaurantId int, menuId int, id int, r map[string]interface{})
 	}
 	resp.Status = "success"
 	resp.Message = "Updated successfully"
+	cacheKey := "menuitem_restaurantid_" + strconv.Itoa(restaurantId) + "_menuid_" + strconv.Itoa(menuId) + "_id_" + strconv.Itoa(id)
+	delete(cacheKey)
 	return encode(resp)
 }
 
@@ -108,6 +119,8 @@ func deleteMenuItem(restaurantId int, menuId int, id int) string {
 	}
 	resp.Status = "success"
 	resp.Message = "Deleted successfully"
+	cacheKey := "menuitem_restaurantid_" + strconv.Itoa(restaurantId) + "_menuid_" + strconv.Itoa(menuId) + "_id_" + strconv.Itoa(id)
+	delete(cacheKey)
 	return encode(resp)
 }
 
@@ -119,7 +132,6 @@ func(m *MenuItem) create() error {
 		return err
 	}
 	_ = result
-	// update cache
 	return err
 }
 

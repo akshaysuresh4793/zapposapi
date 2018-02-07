@@ -16,6 +16,11 @@ type Restaurant struct {
 func getRestaurants(limit int, offset int) string {
 	var resp Response
 	resp.Status = "fail"
+	cacheKey := "restaurant_limit_" + strconv.Itoa(limit) + "_offset_" + strconv.Itoa(offset)
+	cacheValue := get(cacheKey)
+	if len(cacheValue) > 0 {
+		return cacheValue
+	}
 	result, err := readAllRestaurants(limit, offset)
 	if(err != nil) {
 		resp.Message = err.Error()
@@ -24,12 +29,18 @@ func getRestaurants(limit int, offset int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
+	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 
 func getRestaurantById(id int) string {
 	var resp Response
 	resp.Status = "fail"
+	cacheKey := "restaurant_id_" + strconv.Itoa(id)
+	cacheValue := get(cacheKey)
+	if len(cacheValue) > 0 {
+		return cacheValue
+	}
 	result, err := readRestaurant(id)
 	if(err != nil) {
 		resp.Message = err.Error()
@@ -38,6 +49,7 @@ func getRestaurantById(id int) string {
 	resp.Status = "success"
 	resp.Message = "Data retrieved"
 	resp.Data = result
+	set(cacheKey, encode(resp))
 	return encode(resp)
 }
 
@@ -85,6 +97,8 @@ func putRestaurant(id int, r map[string]interface{}) string {
 	}
 	resp.Status = "success"
 	resp.Message = "Updated successfully"
+	cacheKey := "restaurant_id_" + strconv.Itoa(id)
+	delete(cacheKey)
 	return encode(resp)
 }
 
@@ -100,6 +114,8 @@ func deleteRestaurant(id int) string {
 	}
 	resp.Status = "success"
 	resp.Message = "Deleted successfully"
+	cacheKey := "restaurant_id_" + strconv.Itoa(id)
+	delete(cacheKey)
 	return encode(resp)
 }
 
@@ -110,7 +126,6 @@ func(r *Restaurant) create() (error) {
 	result, err := db.Exec("INSERT INTO restaurant(name, location_id) VALUES (?, ?)", r.Name, r.LocationId)
 	handleError(err)
 	_ = result
-	// update cache
 	return err
 }
 
