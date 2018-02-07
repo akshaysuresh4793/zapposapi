@@ -6,6 +6,7 @@ import (
 	"fmt"
 )
 
+var cache *redis.Client
 func initialize() {
 	cacheHost := "localhost"
 	cachePort := "6379"
@@ -16,7 +17,7 @@ func initialize() {
 		cachePort = os.Getenv("CACHEPORT")
 	}
 	fmt.Println("Connecting to Redis - ", cacheHost, ":", cachePort)
-	cache := redis.NewClient(&redis.Options{
+	cache = redis.NewClient(&redis.Options{
 		Addr:     cacheHost + ":" + cachePort,
 		Password: "", // no password set
 		DB:       0,  // use default DB
