@@ -29,7 +29,7 @@ func TestGetMenuItemById(t *testing.T) {
 
 func TestDeleteMenuItem(t *testing.T) {
 	connect("zappos_test")
-	output := deleteMenuItem(1, 1, 2)
+	output := deleteMenuItem(2, 3, 3)
 	expectedOutput := "{\"Status\":\"success\",\"Message\":\"Deleted successfully\",\"Data\":null}"
 	if output != expectedOutput {
 		t.Errorf("Mismatch - Expected : " + expectedOutput + ", output : " + output)
