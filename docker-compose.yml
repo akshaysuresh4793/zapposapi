@@ -1,7 +1,7 @@
 version: '3'
 services:
  web:
-  image: "zapposapi"
+  image: "akshaysuresh4793/zapposapi"
   environment:
     - DBHOST=db
     - DBPORT=3306
@@ -13,6 +13,6 @@ services:
    - "db"
   command: [server]
  db:
-    image: "zapposdb"
+    image: "akshaysuresh4793/zapposdb"
  cache:
     image: "redis"

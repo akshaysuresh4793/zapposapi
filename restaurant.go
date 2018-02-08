@@ -8,7 +8,7 @@ import (
 )
 
 type Restaurant struct {
-	Id         int    `json:"id"`
+	Id         int    `json:"id,string"`
 	Name       string `json:"name"`
 	LocationId int    `json:"locationId,string"`
 }
