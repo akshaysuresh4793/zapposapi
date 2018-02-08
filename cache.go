@@ -10,7 +10,7 @@ import (
 var cache *redis.Client
 
 func cacheInitialize() {
-	cacheHost := "192.168.99.100"
+	cacheHost := "127.0.0.1"
 	cachePort := "6379"
 	if len(os.Getenv("CACHEHOST")) > 0 {
 		cacheHost = os.Getenv("CACHEHOST")

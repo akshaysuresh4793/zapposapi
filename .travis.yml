@@ -2,8 +2,11 @@ language: go
 go:
   - 1.9.x
 sudo: true
+services:
+  - redis-server
 env:
   - DBHOST=127.0.0.1
+  - CACHEHOST=127.0.0.1
 before_script:
   - bash resources/.travis.install-mysql-5.7.sh
   - mysql < schema.sql
