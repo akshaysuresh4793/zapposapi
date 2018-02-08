@@ -27,7 +27,7 @@ func TestGetRestaurantById(t *testing.T) {
 
 func TestDeleteRestaurant(t *testing.T) {
 	connect("zappos_test")
-	output := deleteRestaurant(1)
+	output := deleteRestaurant(2)
 	expectedOutput := "{\"Status\":\"success\",\"Message\":\"Deleted successfully\",\"Data\":null}"
 	if output != expectedOutput {
 		t.Errorf("Mismatch - Expected : " + expectedOutput + ", output : " + output)
