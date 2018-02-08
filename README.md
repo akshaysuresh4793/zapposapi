@@ -43,29 +43,9 @@ The relationships are as follows:
 
 Code structure will come here
 
-# API Documentation
-
-The API documentation URL will come here
-
-Docker image can be downloaded here
-
-# Running the code
-- Using Docker
-	1. Clone this repository
-
-	2. Run the following command to obtain the Docker images
-
-		`docker-compose build`
-
-	3. Run the following command to start each service
-
-		`docker-compose up`
-	
-	If you are using docker-machine (Windows and Docker) the base url would be http://192.168.99.100/
-
-	Otherwise the base url would be http://localhost/
 
 # Routes
+
 1. Add new location
 
 `curl -X POST http://{host}/location -H "Content-Type: application/json" -d '{"name": "Boston"}'`
@@ -145,3 +125,25 @@ Docker image can be downloaded here
 20. Delete a menu item
 
 `curl -X DELETE http://{host}/restaurant/{restaurant-id}/menu/{menu-id}/menu-item/{menu-item-id}`
+
+Docker images can be found here
+
+1. Database - https://hub.docker.com/r/akshaysuresh4793/zapposdb/
+
+2. API - https://hub.docker.com/r/akshaysuresh4793/zapposapi/
+
+# Running the code
+- Using Docker
+	1. Clone this repository
+
+	2. Run the following command to obtain the Docker images
+
+		`docker-compose build`
+
+	3. Run the following command to start each service
+
+		`docker-compose up`
+	
+	If you are using docker-machine (Windows and Docker) the base url would be http://192.168.99.100/
+
+	Otherwise the base url would be http://localhost/
