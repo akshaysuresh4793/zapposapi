@@ -21,8 +21,6 @@ The technologies used are as follows:
 
 # Code structure
 
-![code structure](https://github.com/akshaysuresh4793/zapposapi/blob/master/resources/code%20structure.jpg "Code structure")
-
 Entities involved are as follows:
 
 - Location
@@ -41,8 +39,7 @@ The relationships are as follows:
 
 - A given menu has many menu-items (one-to-many)
 
-Code structure will come here
-
+![code structure](https://github.com/akshaysuresh4793/zapposapi/blob/master/resources/code%20structure.jpg "Code structure")
 
 # Routes
 
