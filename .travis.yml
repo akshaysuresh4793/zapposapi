@@ -1,11 +1,8 @@
 language: go
 go:
-  - 1.x
-  - 1.6
-  - 1.7.x
-  - 1.8.x
   - 1.9.x
-  - master
 services: mysql
 before_script:
   - mysql < schema.sql
+  - go get -v .
+  - go test -v .
