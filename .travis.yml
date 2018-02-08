@@ -1,8 +1,13 @@
-dist: precise
 language: go
 go:
   - 1.9.x
-services: mysql
+addons:
+  apt:
+    sources:
+      - mysql-5.7-trusty
+    packages:
+      - mysql-server
+      - mysql-client
 sudo: required
 env:
   - DBHOST=127.0.0.1
