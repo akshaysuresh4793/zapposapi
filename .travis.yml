@@ -1,5 +1,4 @@
 language: go
-
 go:
   - 1.x
   - 1.6
@@ -7,3 +6,6 @@ go:
   - 1.8.x
   - 1.9.x
   - master
+services: mysql
+before_script:
+  - mysql < schema.sql
