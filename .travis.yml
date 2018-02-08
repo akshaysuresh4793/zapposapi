@@ -2,6 +2,7 @@ language: go
 go:
   - 1.9.x
 services: mysql
+sudo: required
 env:
   - DBHOST=127.0.0.1
 before_script:
