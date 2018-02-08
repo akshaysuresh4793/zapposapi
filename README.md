@@ -17,12 +17,11 @@ The technologies used are as follows:
 
 # Proposed Architecture
 
-Architecture diagram will come here
+![architecture](https://github.com/akshaysuresh4793/zapposapi/blob/master/resources/code%20structure.jpg "Architecture")
 
 # Code structure
 
-The code structure can be illustrated by the following diagram:
-
+![code structure](https://github.com/akshaysuresh4793/zapposapi/blob/master/resources/code%20structure.jpg "Code structure")
 
 Entities involved are as follows:
 
