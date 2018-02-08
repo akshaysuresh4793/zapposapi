@@ -17,7 +17,7 @@ The technologies used are as follows:
 
 # Proposed Architecture
 
-![architecture](https://github.com/akshaysuresh4793/zapposapi/blob/master/resources/code%20structure.jpg "Architecture")
+![architecture](https://github.com/akshaysuresh4793/zapposapi/blob/master/resources/architecture.jpg "Architecture")
 
 # Code structure
 
