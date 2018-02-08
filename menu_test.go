@@ -18,7 +18,7 @@ func TestPostMenu(t *testing.T) {
 
 func TestGetMenuById(t *testing.T) {
 	connect("zappos_test")
-	output := getMenuById(1,2)
+	output := getMenuById(1,1)
 	expectedOutput := "{\"Status\":\"success\",\"Message\":\"Data retrieved\",\"Data\":{\"id\":\"1\",\"name\":\"Breakfast\",\"restaurantId\":\"1\"}}"
 	if output != expectedOutput {
 		t.Errorf("Mismatch - Expected : " + expectedOutput + ", output : " + output)
