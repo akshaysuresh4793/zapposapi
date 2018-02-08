@@ -3,7 +3,7 @@ Zappos.com Restaurant API
 
 # Introduction
 
-This is an API architecture for Restaurants.
+This is an API architecture for Restaurant menus.
 
 The technologies used are as follows:
 
@@ -29,13 +29,13 @@ Entities involved are as follows:
 
 - Menu
 
-- MenuItem
+- Menu Item
 
 The relationships are as follows:
 
 - A given location has many restaurants (one-to-many)
 
-- A given restautant has many menus (one-to-many)
+- A given restaurant has many menus (one-to-many)
 
 - A given menu has many menu-items (one-to-many)
 
