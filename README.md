@@ -1,4 +1,4 @@
-# zapposapi
+# zapposapi [![Build Status](https://travis-ci.org/akshaysuresh4793/zapposapi.svg?branch=master)](https://travis-ci.org/akshaysuresh4793/zapposapi)
 Zappos.com Restaurant API
 
 # Introduction
@@ -14,8 +14,6 @@ The technologies used are as follows:
 - **Docker** - Containerization
 
 - **Redis** - Caching Layer
-
-- **Supervisor** - Run the API as child processes so that it starts again if it terminates with non-zero exit code
 
 # Proposed Architecture
 
